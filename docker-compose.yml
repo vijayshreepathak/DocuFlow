@@ -1,0 +1,131 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: vijayshreepathak_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: vijayshreepathak_scraper
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - scraper_network
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: vijayshreepathak_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - scraper_network
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: vijayshreepathak_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/vijayshreepathak_scraper?authSource=admin
+      MONGODB_DB: vijayshreepathak_scraper
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - scraper_network
+
+  scraper:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.scraper
+    container_name: vijayshreepathak_scraper
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/vijayshreepathak_scraper?authSource=admin
+      MONGODB_DB: vijayshreepathak_scraper
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - scraper_network
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: vijayshreepathak_celery_worker
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/vijayshreepathak_scraper?authSource=admin
+      MONGODB_DB: vijayshreepathak_scraper
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - scraper_network
+    command: celery -A workers.celery_app worker --loglevel=info --concurrency=4
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: vijayshreepathak_celery_beat
+    restart: unless-stopped
+    environment:
+      MONGODB_URL: mongodb://admin:password123@mongodb:27017/vijayshreepathak_scraper?authSource=admin
+      MONGODB_DB: vijayshreepathak_scraper
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - scraper_network
+    command: celery -A workers.celery_app beat --loglevel=info
+
+  flower:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    container_name: vijayshreepathak_flower
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - scraper_network
+    command: celery -A workers.celery_app flower --port=5555
+
+volumes:
+  mongodb_data:
+  redis_data:
+
+networks:
+  scraper_network:
+    driver: bridge 
