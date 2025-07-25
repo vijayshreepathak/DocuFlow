@@ -223,7 +223,7 @@ docker-compose up --build
 
 ---
 
-## © 2025 Vijay Shree Pathak
+## © 2025 Vijayshree Vaibhav
 
 This project scrapes and organizes data from [vijayshree.netlify.app](https://vijayshree.netlify.app/) (my portfolio website) for educational and portfolio demonstration purposes.
 
