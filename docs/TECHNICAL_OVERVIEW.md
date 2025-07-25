@@ -1,6 +1,6 @@
 # DocuFlow: Technical Overview
 
-This document explains, in human terms, how **DocuFlow** scrapes and organizes all content from [vijayshree.netlify.app](https://vijayshree.netlify.app/) (your portfolio website), and why it’s designed the way it is. It’s meant for engineers, product managers, and anyone curious about the architecture and design choices.
+This document explains, in human terms, how **DocuFlow** scrapes and organizes all content from [vijayshree.netlify.app](https://vijayshree.netlify.app/) (my portfolio website), and why it’s designed the way it is. It’s meant for engineers, product managers, and anyone curious about the architecture and design choices.
 
 [GitHub Repo: DocuFlow](https://github.com/vijayshreepathak/DocuFlow)
 
