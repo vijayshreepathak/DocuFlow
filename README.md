@@ -22,49 +22,59 @@ This system is designed to:
 
 ```mermaid
 flowchart TD
-    subgraph User
-        U1[User / API Client]
+    %% ========= Client =========
+    subgraph Client
+        U1["User / API Client"]
     end
 
-    subgraph API Layer
-        A1[FastAPI REST API]
+    %% ========= API Layer =========
+    subgraph "API Layer"
+        A1["FastAPI REST API"]
     end
 
-    subgraph Scraper Cluster
-        S1[Scraper (Async, aiohttp, BeautifulSoup)]
-        W1[Celery Worker(s)]
-        B1[Celery Beat (Scheduler)]
+    %% ========= Scraper Cluster =========
+    subgraph "Scraper Cluster"
+        S1["Async Scraper<br/>(aiohttp + BeautifulSoup)"]
+        W1["Celery Worker Pool"]
+        B1["Celery Beat<br/>(Scheduler)"]
     end
 
-    subgraph Data Layer
-        M1[MongoDB<br/>(pages, jobs, queue, structure)]
-        R1[Redis<br/>(Celery Broker/Queue)]
+    %% ========= Data Layer =========
+    subgraph "Data Layer"
+        M1["MongoDB<br/>(pages, jobs, structure)"]
+        R1["Redis<br/>(Celery Broker / Cache)"]
     end
 
+    %% ========= Monitoring =========
     subgraph Monitoring
-        F1[Flower Dashboard]
-        L1[Logs/Monitoring]
+        F1["Flower Dashboard"]
+        L1["Centralised Logging"]
     end
 
-    U1-->|HTTP Requests|A1
-    A1-->|Task Submission|R1
-    A1-->|Read/Write|M1
-    S1-->|Scrape/Process|M1
-    S1-->|Queue Tasks|R1
-    W1-->|Process Tasks|S1
-    W1-->|Write Results|M1
-    B1-->|Schedule Tasks|R1
-    F1-->|Monitor Celery|R1
-    F1-->|Monitor Workers|W1
-    L1-->|Logs|A1
-    L1-->|Logs|S1
-    L1-->|Logs|W1
-    L1-->|Logs|B1
+    %% ---------- Primary user flow ----------
+    U1 ==> |HTTP JSON requests| A1
+    A1 ==> |CRUD pages / jobs| M1
+    A1 -.-> |enqueue scrape task| R1
 
-    %% Internal connections
-    R1-->|Distributes Tasks|W1
-    S1-->|Discovery/Queue|M1
-    S1-->|Deduplication|M1
+    %% ---------- Scraping & task processing ----------
+    B1 --> |periodic enqueue| R1
+    R1 --> |pop task| W1
+    W1 --> |invoke scraper| S1
+    S1 --> |read/write content| M1
+    W1 --> |store results / status| M1
+
+    %% ---------- Monitoring ----------
+    F1 --- |stats & metrics| R1
+    F1 --- |worker heartbeat| W1
+    L1 --- A1
+    L1 --- S1
+    L1 --- W1
+    L1 --- B1
+
+    %% ---------- Notes ----------
+    classDef faded fill:#ffffff,stroke:#bbb,color:#888;
+    %% (optional) uncomment to fade internal arrows
+    %% linkStyle default stroke-width:1,stroke:#888,fill:none;
 ```
 
 **Explanation:**
