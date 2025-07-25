@@ -1,6 +1,6 @@
 # DocuFlow
 
-A production-ready, distributed web scraping and data management system that crawls [vijayshree.netlify.app](https://vijayshree.netlify.app/) (your portfolio website), extracts all documentation and content page-wise, processes and structures the data, and stores it in MongoDB for efficient retrieval and search.
+A production-ready, distributed web scraping and data management system that crawls [vijayshree.netlify.app](https://vijayshree.netlify.app/) (my portfolio website), extracts all documentation and content page-wise, processes and structures the data, and stores it in MongoDB for efficient retrieval and search.
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-DocuFlow-blue?logo=github)](https://github.com/vijayshreepathak/DocuFlow)
 
@@ -225,6 +225,6 @@ docker-compose up --build
 
 ## © 2025 Vijay Shree Pathak
 
-This project scrapes and organizes data from [vijayshree.netlify.app](https://vijayshree.netlify.app/) (your portfolio website) for educational and portfolio demonstration purposes.
+This project scrapes and organizes data from [vijayshree.netlify.app](https://vijayshree.netlify.app/) (my portfolio website) for educational and portfolio demonstration purposes.
 
 [GitHub Repo: DocuFlow](https://github.com/vijayshreepathak/DocuFlow) 
